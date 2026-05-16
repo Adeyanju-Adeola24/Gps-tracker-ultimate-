@@ -1,0 +1,11 @@
+{
+  "rules": {
+    "locations": {
+      "$deviceId": {
+        ".read": false,
+        ".write": "$deviceId.length > 0",
+        ".validate": "newData.isString() && newData.val().length < 5000"
+      }
+    }
+  }
+}
