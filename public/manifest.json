@@ -1,0 +1,16 @@
+{
+  "name": "Offline Document Viewer",
+  "short_name": "DocViewer",
+  "description": "View and store legal contracts for offline access",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0052cc",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/4761/4761087.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
