@@ -1,0 +1,18 @@
+{
+  "name": "gps-tracker-ultimate",
+  "version": "0.1.0",
+  "description": "Proxy and client payload for GPS tracking (proof-of-concept).",
+  "main": "proxy-server.js",
+  "scripts": {
+    "start": "node proxy-server.js"
+  },
+  "author": "Adeyanju-Adeola24",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "dotenv": "^10.0.0",
+    "express": "^4.18.0",
+    "ioredis": "^5.0.0",
+    "pg": "^8.7.0",
+    "ws": "^8.0.0"
+  }
+}
