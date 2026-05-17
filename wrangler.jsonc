@@ -1,0 +1,23 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "contract-123",
+  "main": "worker.js",                // Worker entry point
+  "compatibility_date": "2026-05-17",
+  "observability": {
+    "enabled": true
+  },
+  "assets": {
+    "directory": "public",            // Static assets
+    "binding": "ASSETS"               // Accessible as env.ASSETS
+  },
+  "d1_databases": [
+    {
+      "binding": "LOCATIONS_DB",      // Name used in code
+      "database_name": "gps-locations",
+      "database_id": ""                // Will be filled after creation
+    }
+  ],
+  "compatibility_flags": [
+    "nodejs_compat"
+  ]
+}
